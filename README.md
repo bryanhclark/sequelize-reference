@@ -929,4 +929,222 @@ cody.destroy() // no! bye Cody!
     // now the cody row is no longer in the database
   })
 ```
+# Senior Checkpoint
 
+### Data Structures
+
+#### Queue
+- relies on enqueing and dequeing from a data array
+- put the magnitude(number) and data(array) on the constructor
+- then put enqueue and dequeu as prototype methods on the constructor
+
+###Link List
+
+-  a linked array of nodes that are linked from head to tail
+-  put this.head and this.tail in the contructor of the linked list 
+- node constructors shouls have this.value(constructor argument), this.next, this.previous on their constructor
+- prototype methods are add to heead and add to tail
+- other prototype methods are remove head and remove tail which requiring traversing to the desired node, deleteing it, then reassigning the linkedlists head/tail
+
+
+```js
+LinkedList.prototype.addToTail = function (value) {
+    //if it's the first node
+    if (!this.tail) {
+        //add the first node and the head is also the tail
+        this.tail = new Node(value);
+        this.head = this.tail;
+    } else {
+        //if there's already a node in the list
+        //make new tail
+        var newTail = new Node(value);
+        //change new tail's previous to be the current tail
+        newTail.previous = this.tail;
+        //change current tail's next to be new tail
+        this.tail.next = newTail;
+        //then swap the current tail with the new tail
+        this.tail = newTail;
+    }
+};
+
+LinkedList.prototype.removeHead = function () {
+    //if there's no head, it shouhld return null, 
+    var removedHead = null;
+    //if head exists, 
+    if (this.head) {
+        removedHead = this.head.value;
+        //if there's ony one node
+        if (this.head === this.tail) {
+            this.head = null;
+            this.tail = null;
+            //if there's more then one node
+        } else {
+            //change current head to be the head's next
+            this.head = this.head.next;
+            //then change new head's previous to null
+            this.head.previous = null;
+        }
+    }
+    return removedHead;
+};
+```
+
+
+### Binary Search Tree
+
+- construcotr takes a number as argument
+- on constructor:
+    - this.value(number)
+    - this.left
+    - this.right
+    - this.magnitude
+- prototype methods are:
+    - contains
+    - size
+    - insert
+        - traverse to the desired branch node and then insert a new Tree instance at the node
+
+
+```js
+BinarySearchTree.prototype.depthFirstForEach = function (callback, order) {
+
+    if (order === 'pre-order') callback(this.value);
+    if (this.left) this.left.depthFirstForEach(callback, order);
+    if (order === 'in-order' || !order) callback(this.value);
+    if (this.right) this.right.depthFirstForEach(callback, order);
+    if (order === 'post-order') callback(this.value);
+};
+
+BinarySearchTree.prototype.breadthFirstForEach = function (callback, node = this) {
+    var queue = [node];
+    while (queue.length) {
+        var first = queue.shift();
+        if (first.left) queue.push(first.left) //add left to queue
+        if (first.right) queue.push(first.right) //add right to queueu
+        //popoffqueue[0] and pass it into callback
+        callback(first.value);
+    };
+};
+```
+
+###Hashtable
+- on constructor, create the number of buckets available
+- prototype methods:
+    - set
+        - if there is a collision, add the new key to the head of the linked list and the previous value is the new tail
+    - get
+        - pass your value you want to get through the hash
+        - check to see if that key is present on the table value
+        - if it does exist, traverse down the linked list to see if you value exists
+
+### Sorting
+
+####Bubble Sort
+- recursively
+
+```js
+function bubbleSort(arr) {
+    debugger;
+    //look at first two indecis, if [0] > [1] -> holder is [0];
+
+    do {
+        var hasBeenSwapped = false;
+        for (var i = 0; i < arr.length - 1; i++) {
+            if (arr[i] > arr[i + 1]) {
+                var swappedArr = swap(arr[i], arr[i + 1]);
+                arr[i] = swappedArr[0];
+                arr[i + 1] = swappedArr[1];
+                hasBeenSwapped = true;
+            }
+        }
+    } while (hasBeenSwapped);
+    return arr;
+}
+
+const swap = (a, b) => {
+    return [b, a]
+}
+```
+
+
+###MergeSort
+
+```js
+function mergeSort(array) {
+    if (array.length < 2) return array;
+    var a = split(array)[0];
+    var b = split(array)[1];
+    return merge(mergeSort(a), mergeSort(b));
+}
+```
+
+## React / Redux
+- here's some subscribe/dispatch boilerplate that we did during
+- 
+```js
+constructor () {
+    super();
+    this.state = store.getState();
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  componentDidMount () {
+    this.unsubscribe = store.subscribe(() => this.setState(store.getState()));
+  }
+
+  componentWillUnmount () {
+    this.unsubscribe();
+  }
+
+  handleChange (evt) {
+    store.dispatch(updateName(evt.target.value));
+  }
+```
+
+#### Store
+- store boilerplate
+```js
+
+import {
+    createStore,
+    applyMiddleware,
+    combineReducers
+} from 'redux';
+import { createLogger } from 'redux-logger';
+import thunkMiddleware from 'redux-thunk';
+import { composeWithDevTools } from 'redux-devtools-extension';
+
+// import the messages sub-reducer
+import channels, { fetchMessages, fetchChannels } from './channels';
+import messages from './messages';
+import name from './name';
+import newChannelEntry from './newChannelEntry';
+import newMessageEntry from './newMessageEntry';
+import currentChannel from './getChannelName'
+
+const reducer = combineReducers({
+    channels,
+    messages,
+    name,
+    newChannelEntry,
+    newMessageEntry,
+    currentChannel
+});
+
+const store = createStore(
+    reducer,
+    composeWithDevTools(applyMiddleware(
+        thunkMiddleware,
+        createLogger()
+    ))
+);
+
+export default store;
+
+export * from './channels';
+export * from './messages';
+export * from './name';
+export * from './newChannelEntry';
+export * from './newMessageEntry';
+export * from './getChannelName';
+```
